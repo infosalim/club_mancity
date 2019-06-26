@@ -8,12 +8,15 @@ import PublicRoutes from './Components/AuthRoutes/PublicRoutes';
 import Home from './Components/Home/Index';
 import SignIn from './Components/Signin/Index';
 import Dashboard from './Components/Admin/Dashboard';
+import AdminMatches from './Components/Admin/Matches/index';
+
 
 const Routes = (props) => {
   return(
     <div>
       <Layout>
         <Switch>
+          <PrivateRoute {...props} exact component={AdminMatches} path="/admin_matches" />
           <PrivateRoute {...props} exact component={Dashboard} path="/dashboard" />
           <PublicRoutes {...props} restrickted={true} exact component={SignIn} path="/sign_in" />
           <PublicRoutes {...props} restrickted={false} exact component={Home} path="/" />
