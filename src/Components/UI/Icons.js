@@ -9,7 +9,8 @@ export const CityLogo = (props) => {
         style={{
             width: props.width,
             height: props.height,
-            background: `url(${mcityLogo}) no-repeat`
+            background: `url(${mcityLogo}) no-repeat`,
+            display: 'inline-block'
         }}
     ></div>
 

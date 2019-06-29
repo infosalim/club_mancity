@@ -33,7 +33,6 @@ class AdminPlayer extends Component {
     }
 
     render() {
-        console.log(this.state);
         return (
             <AdminLayout>
                 <div>
