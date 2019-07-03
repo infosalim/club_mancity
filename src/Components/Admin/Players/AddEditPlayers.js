@@ -91,25 +91,55 @@ class AddEditPlayers extends Component {
         }
     }
 
-    componentDidMount(){
+    updateFields = (player, playerId, formType, defaultImg) => {
+        const newFormData = { ...this.state.formdata };
+
+        for(let key in newFormData){
+            newFormData[key].value = player[key];
+            newFormData[key].valid = true
+        }
+
+        this.setState({
+            playerId,
+            defaultImg,
+            formType,
+            formdata: newFormData
+        });
+    }
+
+    componentDidMount() {
         const playerId = this.props.match.params.id;
 
-        if(!playerId){
+        if (!playerId) {
             this.setState({
                 formType: 'Add Player'
-            })
-        }else{
+            });
+        } else {
+            firebaseDB.ref(`players/${playerId}`).once('value')
+                .then(snapshot => {
+                    const playerData = snapshot.val();
 
+                    firebase.storage().ref('players')
+                        .child(playerData.image).getDownloadURL()
+                        .then(url => {
+                            this.updateFields(playerData, playerId, 'Edit player', url);
+                        }).catch(e=>{
+                            this.updateFields({
+                                ...playerData,
+                                image: ''
+                            }, playerId, 'Edit player', '');
+                        })
+                })
         }
     }
 
-    updateForm(element, content='') {
+    updateForm(element, content = '') {
         const newFormdata = { ...this.state.formdata };
         const newElement = { ...newFormdata[element.id] };
 
-        if( content === ''){
+        if (content === '') {
             newElement.value = element.event.target.value;
-        }else{
+        } else {
             newElement.value = content
         }
 
@@ -122,6 +152,17 @@ class AddEditPlayers extends Component {
             formError: false,
             formdata: newFormdata
         });
+    }
+
+    successForm = message => {
+        this.setState({
+            formSuccess: message
+        });
+        setTimeout(()=>{
+            this.setState({
+                formSuccess: ''
+            });
+        }, 2000)
     }
 
 
@@ -137,12 +178,17 @@ class AddEditPlayers extends Component {
         }
 
         if (formIsValid) {
-            if(this.state.formType === 'Edit player'){
-                ///
-            }else{
-                firebasePlayers.push(dataToSubmit).then(()=>{
+            if (this.state.formType === 'Edit player') {
+                firebaseDB.ref(`players/${this.state.playerId}`)
+                 .update(dataToSubmit).then(()=>{
+                     this.successForm('Update correctly');
+                 }).catch(err=>{
+                     this.setState({formError:true})
+                 })
+            } else {
+                firebasePlayers.push(dataToSubmit).then(() => {
                     this.props.history.push('/admin_players');
-                }).catch(e=>{
+                }).catch(e => {
                     this.setState({
                         formError: true
                     })
@@ -156,17 +202,17 @@ class AddEditPlayers extends Component {
     };
 
     resetImage = () => {
-        const newFormData = {...this.state.formdata};
+        const newFormData = { ...this.state.formdata };
         newFormData['image'].value = '';
         newFormData['image'].valid = false;
         this.setState({
-            defaultImg:'',
+            defaultImg: '',
             formdata: newFormData
         })
     }
 
     storeFileName = (filename) => {
-        this.updateForm({id:'image'}, filename);
+        this.updateForm({ id: 'image' }, filename);
     }
 
     render() {
@@ -182,9 +228,9 @@ class AddEditPlayers extends Component {
                                 tag={'Player image'}
                                 defaultImg={this.state.defaultImg}
                                 defaultImgName={this.state.formdata.image.value}
-                                resetImage={()=>this.resetImage()}
-                                filename={filename=>this.storeFileName(filename)}
-                                
+                                resetImage={() => this.resetImage()}
+                                filename={filename => this.storeFileName(filename)}
+
                             />
 
                             <FormField
