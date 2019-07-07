@@ -6,8 +6,6 @@ import Stripes from '../../Resources/images/stripes.png';
 import { firebasePlayers, firebase } from "../../firebase";
 import { firebaseLooper } from "../UI/Misc";
 import Promise from 'core-js-pure/features/promise';
-import { resolve } from "url";
-import { reject } from "q";
 class TheTeam extends Component {
 
     state = {
